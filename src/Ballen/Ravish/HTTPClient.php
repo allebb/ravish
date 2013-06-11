@@ -59,7 +59,7 @@ class HTTPClient
      * @param string $uri The full URI to request and get the raw response from.
      * @return \Ballen\Ravish\HTTPClient
      */
-    protected function sendRequest($uri)
+    public function sendRequest($uri)
     {
         $aContext = array(
             'http' => array(
@@ -128,6 +128,15 @@ class HTTPClient
         $this->request_wsmethod = null;
         $this->request_httpmethod = 'GET';
         return $this;
+    }
+
+    /**
+     * Returns the RAW response from the server.
+     * @return string The RAW response recieved from the server.
+     */
+    public function rawResponse()
+    {
+        return $this->response;
     }
 
 }
