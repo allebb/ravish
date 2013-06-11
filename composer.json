@@ -1,0 +1,24 @@
+{
+    "name": "ballen/ravish",
+    "version": "1.0.0",
+    "description": "Ravish is a composer/PSR-0 compatible basic HTTP Client for PHP.",
+    "type": "library",
+    "keywords": ["http", "webservice", "client", "JSON", "XML", "JSONP"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ballen",
+            "email": "bobbyallen.uk@gmail.com",
+            "homepage": "http://www.bobbyallen.me",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Ballen\\Ravish": "src/"
+        }
+    }
+}
