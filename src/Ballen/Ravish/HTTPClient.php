@@ -139,6 +139,42 @@ class HTTPClient
         return $this->response;
     }
 
+    /**
+     * Returns an object from a JSON formatted HTTP response.
+     * @return object Response data object.
+     */
+    public function jsonObjectResponse()
+    {
+        return json_decode($this->response);
+    }
+
+    /**
+     * Returns a data array from a JSON formatted HTTP response.
+     * @return array Response data array
+     */
+    public function jsonArrayResponse()
+    {
+        return json_decode($this->response, true);
+    }
+
+    /**
+     * Returns an object from an XML formatted HTTP response (requires the SimpleXML extension!)
+     * @return object Response data object.
+     */
+    public function xmlObjectResponse()
+    {
+        return simplexml_load_string($this->response);
+    }
+
+    /**
+     * Returns a data array from an XML formatted HTTP response (requires the SimpleXML extension!)
+     * @return array Response data array.
+     */
+    public function xmlArrayResponse()
+    {
+        return json_decode(json_encode($this->xmlObjectResponse()), true);
+    }
+
 }
 
 ?>

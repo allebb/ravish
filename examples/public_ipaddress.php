@@ -18,10 +18,11 @@ use Ballen\Ravish\HTTPClient;
 
 $bindhub_service = new HTTPClient();
 
-$bindhub_endpoint = 'https://www.bindhub.com/api/ip.json';
+$bindhub_endpoint = 'https://www.bindhub.com/api/ip.xml';
 $bindhub_service->sendRequest($bindhub_endpoint);
 
-$response = $bindhub_service->rawResponse();
+echo "Your public IP address is: " . $bindhub_service->xmlObjectResponse()->address->public;
 
-echo $response;
+//var_dump($bindhub_service->xmlObjectResponse());
+
 ?>
