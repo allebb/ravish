@@ -43,10 +43,22 @@ class HTTPClient
     private $request_httpmethod = 'GET';
 
     /**
-     * Array of POST variables to send with the request.
+     * Stores custom headers for the request.
+     * @var type
+     */
+    private $request_headers = array();
+
+    /**
+     * Stores an optional raw request body.
+     * @var string Request body content.
+     */
+    private $request_body = null;
+
+    /**
+     * Array of optional POST/PUT/DELETE variables to send with the request.
      * @var array
      */
-    private $post_params = array();
+    private $request_params = array();
 
     /**
      * Object storage for the web service response.
@@ -73,26 +85,43 @@ class HTTPClient
                 'request_fulluri' => true,
             ),
         );
+        // If a proxy server has been specified we'll set the proxy header autoamtically.
         if ($this->proxy_host) {
             $aContext['http'] = array_merge($aContext['http'], array('proxy' => $this->proxy_host . ':' . $this->proxy_port));
         }
-        if (count($this->post_params) > 0) {
+        // If a raw request body has been set, we'll send the content with the request.
+        if ($this->request_body != null) {
             if (!isset($aContext['http']['header'])) {
                 $aContext['http']['header'] = array();
             }
-            $request_content = http_build_query($this->post_params);
+            array_push($aContext['http']['header'], 'Content-Length: ' . strlen($this->request_body));
+            $aContext['http']['content'] = $this->request_body;
+        }
+        // If POST/PUT/DELETE parameters have been sent, we'll send them with the form type x-www-form-urlencoded autoamtically!
+        if (count($this->request_params) > 0) {
+            if (!isset($aContext['http']['header'])) {
+                $aContext['http']['header'] = array();
+            }
+            $request_content = http_build_query($this->request_params);
             array_push($aContext['http']['header'], 'Content-Type: application/x-www-form-urlencoded');
             array_push($aContext['http']['header'], 'Content-Length: ' . strlen($request_content));
             $aContext['http']['content'] = $request_content;
         }
+        // If proxy authentication has been provided, we'll set the header for this now!
         if ($this->proxy_auth) {
             if (!isset($aContext['http']['header'])) {
                 $aContext['http']['header'] = array();
             }
             array_push($aContext['http']['header'], "Proxy-Authorization: Basic $this->proxy_auth");
         }
+        if (count($this->request_headers) > 0) {
+            foreach ($this->request_headers as $custom_header => $custom_value) {
+                array_push($aContext['http']['header'], $custom_header . ": " . $custom_value);
+            }
+        }
+        #die(var_dump($aContext));
         $cxContext = stream_context_create($aContext);
-        $this->response_body = @file_get_contents($uri, false, $cxContext);
+        $this->response_body = file_get_contents($uri, false, $cxContext);
         if ($this->response_body === false) {
             return false;
         } else {
@@ -129,12 +158,97 @@ class HTTPClient
     }
 
     /**
+     * Add a custom request header.
+     * @param string $name Header name/key eg. 'Content-type'
+     * @param string $value Value of the header for example 'application/json'
+     * @return \Ballen\Ravish\HTTPClient
+     */
+    public function addRequestHeader($name, $value)
+    {
+        $this->request_headers[$name] = $value;
+        return $this;
+    }
+
+    /**
+     * Adds a POST/PUT/DELETE parameter to the request.
+     * @param string $key The parameter name/key.
+     * @param string $value The parameter value.
+     * @return \Ballen\Ravish\HTTPClient
+     */
+    public function addParameter($key, $value)
+    {
+        $this->request_params[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * Sets a raw request body string.
+     * @param string $content
+     * @return \Ballen\Ravish\HTTPClient
+     */
+    public function setRequestBody($content)
+    {
+        $this->request_body = $content;
+        return $this;
+    }
+
+    /**
+     * Sets the request type to be 'POST'.
+     * @return \Ballen\Ravish\HTTPClient
+     */
+    public function post()
+    {
+        $this->request_httpmethod = 'POST';
+        return $this;
+    }
+
+    /**
+     * Sets the request type to be 'GET'.
+     * @return \Ballen\Ravish\HTTPClient
+     */
+    public function get()
+    {
+        $this->request_httpmethod = 'GET';
+        return $this;
+    }
+
+    /**
+     * Sets the request type to be 'PUT'.
+     * @return \Ballen\Ravish\HTTPClient
+     */
+    public function put()
+    {
+        $this->request_httpmethod = 'PUT';
+        return $this;
+    }
+
+    /**
+     * Sets the request type to be 'PATCH'.
+     * @return \Ballen\Ravish\HTTPClient
+     */
+    public function patch()
+    {
+        $this->request_httpmethod = 'PATCH';
+        return $this;
+    }
+
+    /**
+     * Sets the request type to be 'DELETE'.
+     * @return \Ballen\Ravish\HTTPClient
+     */
+    public function delete()
+    {
+        $this->request_httpmethod = 'DELETE';
+        return $this;
+    }
+
+    /**
      * Resets the request parameters/settings ready for the next request.
      * @return \Ballen\Ravish\HTTPClient
      */
     protected function resetRequest()
     {
-        $this->post_params = array();
+        $this->request_params = array();
         $this->request_wsmethod = null;
         $this->request_httpmethod = 'GET';
         return $this;
