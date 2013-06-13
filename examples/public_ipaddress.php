@@ -22,7 +22,7 @@ $bindhub_endpoint = 'https://www.bindhub.com/api/ip.xml';
 
 if ($bindhub_service->get()->sendRequest($bindhub_endpoint)) {
     echo "Your public IP address is: " . $bindhub_service->xmlObjectResponse()->address->public;
-    echo "<br /><br />The response headers was as follows: <strong>" . $bindhub_service->responseHeaders()->status_code . "</strong>";
+    echo "<br /><br />The response headers was as follows:<br/> <strong>" . $bindhub_service->responseHeaders()->status_code . "</strong>";
 } else {
     echo "<strong>Unable to get response from site!</strong><p>Are you sure you have the correct web service address, are connected to the internet or if you are using a proxy server in your network are you correctly authetnicated?</p>";
 }

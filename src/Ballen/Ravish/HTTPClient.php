@@ -55,6 +55,12 @@ class HTTPClient
     private $request_body = null;
 
     /**
+     * Useragent string to send with each request.
+     * @var string The useragent string sent with requests.
+     */
+    private $user_agent = 'Ravish/1.0';
+
+    /**
      * Array of optional POST/PUT/DELETE variables to send with the request.
      * @var array
      */
@@ -85,42 +91,37 @@ class HTTPClient
                 'request_fulluri' => true,
             ),
         );
+        $aContext['http']['header'] = array();
+        $aContext['http']['header'][] = 'User-Agent: ' . $this->user_agent;
         // If a proxy server has been specified we'll set the proxy header autoamtically.
         if ($this->proxy_host) {
             $aContext['http'] = array_merge($aContext['http'], array('proxy' => $this->proxy_host . ':' . $this->proxy_port));
         }
         // If proxy authentication has been provided, we'll set the header for this now!
         if ($this->proxy_auth) {
-            if (!isset($aContext['http']['header'])) {
-                $aContext['http']['header'] = array();
-            }
             array_push($aContext['http']['header'], "Proxy-Authorization: Basic $this->proxy_auth");
         }
         // If a raw request body has been set, we'll send the content with the request.
         if ($this->request_body != null) {
-            if (!isset($aContext['http']['header'])) {
-                $aContext['http']['header'] = array();
-            }
             array_push($aContext['http']['header'], 'Content-Length: ' . strlen($this->request_body));
             $aContext['http']['content'] = $this->request_body;
         }
         // If POST/PUT/DELETE parameters have been sent, we'll send them with the form type x-www-form-urlencoded autoamtically!
         if (count($this->request_params) > 0) {
-            if (!isset($aContext['http']['header'])) {
-                $aContext['http']['header'] = array();
-            }
             $request_content = http_build_query($this->request_params);
             array_push($aContext['http']['header'], 'Content-Type: application/x-www-form-urlencoded');
             array_push($aContext['http']['header'], 'Content-Length: ' . strlen($request_content));
             $aContext['http']['content'] = $request_content;
         }
+        // We go through and add all the other custom HTTP headers and then the useragent.
         if (count($this->request_headers) > 0) {
             foreach ($this->request_headers as $custom_header => $custom_value) {
                 array_push($aContext['http']['header'], $custom_header . ": " . $custom_value);
             }
         }
         $cxContext = stream_context_create($aContext);
-        $this->response_body = @file_get_contents($uri, false, $cxContext);
+        var_dump($aContext);
+        $this->response_body = file_get_contents($uri, false, $cxContext);
         if ($this->response_body === false) {
             $this->response_headers = $http_response_header;
             return false;
@@ -154,6 +155,16 @@ class HTTPClient
     public function setProxyAuth($username, $password)
     {
         $this->proxy_auth = base64_encode("$username:$password");
+        return $this;
+    }
+
+    /**
+     * Enables the setting of a custom useragent string.
+     * @param string $useragent
+     */
+    public function setCustomUserAgent($useragent)
+    {
+        $this->user_agent = $useragent;
         return $this;
     }
 

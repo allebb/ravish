@@ -25,19 +25,15 @@ $request_body = array(
     'public' => true,
     'files' => array(
         'file1.txt' => array(
-            'content' => 'This is a very quick test using the Ravish HTTPClient from https://github.com/bobsta63/ravish.'
+            'content' => 'This is a very quick test using the Ravish HTTPClient from'
         )
     )
 );
 $github_api->post()
         ->addRequestHeader('Content-type', 'application/json')
         ->setRequestBody(json_encode($request_body));
+$github_api->sendRequest($github_api_endpoint);
+var_dump($github_api);
 
-if ($github_api->sendRequest($github_api_endpoint)) {
-    echo "Gist Created, details as follows:<br />" . $github_api->responseHeadersRaw() . "<br/ >" . $github_api->rawResponse();
-} else {
-    echo "<strong>Unable to get response from site!</strong><p>Are you sure you have the correct web service address, are connected to the internet or if you are using a proxy server in your network are you correctly authetnicated?</p>";
-}
-
-//var_dump($bindhub_service->xmlObjectResponse());
+echo $github_api->responseHeadersRaw();
 ?>

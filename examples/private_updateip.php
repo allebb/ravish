@@ -38,14 +38,10 @@ if ($bindhub_service->sendRequest($bindhub_publicip_endpoint)) {
             ->addParameter('target', trim($ipa));
     $bindhub_updater->post();
     $bindhub_updater->sendRequest($bindhub_updateip_endpoint);
-    #die($bindhub_service->responseHeadersRaw());
-    var_dump($bindhub_updater);
     if ($bindhub_updater->responseHeaders()->status_code == 200) {
-
         echo "New IP address has been updated successfully!";
     } else {
-        //var_dump($bindhub_updater->jsonObjectResponse());
-        echo "Oppps an error occured, the error code was <strong>" . $bindhub_updater->responseHeaders()->status_code . " (" . $bindhub_updater->responseHeaders()->status_text . ")</strong> and web service reported the issue was: <em>" . $bindhub_updater->responseHeadersRaw() . " Raw response was: " . $bindhub_updater->rawResponse() . "</em>.";
+        echo "Oppps an error occured, the error code was <strong>" . $bindhub_updater->responseHeaders()->status_code . " (" . $bindhub_updater->responseHeaders()->status_text . ")</strong> and web service reported the issue was: <br /><em>" . $bindhub_updater->responseHeadersRaw() . " <br />Raw response was: " . $bindhub_updater->rawResponse() . "</em>.";
     }
 } else {
     echo "<strong>Unable to get response from site!</strong><p>Are you sure you have the correct web service address, are connected to the internet or if you are using a proxy server in your network are you correctly authetnicated?</p>";
