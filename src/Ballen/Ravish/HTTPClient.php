@@ -19,12 +19,6 @@ class HTTPClient
 {
 
     /**
-     * Object storage for the web service response.
-     * @var string JSON response data.
-     */
-    private $response = null;
-
-    /**
      * Optional proxy server hostname or IP address.
      * @var string
      */
@@ -53,6 +47,18 @@ class HTTPClient
      * @var array
      */
     private $post_params = array();
+
+    /**
+     * Object storage for the web service response.
+     * @var string Response data.
+     */
+    private $response_body = null;
+
+    /**
+     * Object storage for the web service response headers.
+     * @var array Response headers recieved.
+     */
+    private $response_headers = null;
 
     /**
      * Sends the request to server and returns the raw response.
@@ -86,7 +92,8 @@ class HTTPClient
             array_push($aContext['http']['header'], "Proxy-Authorization: Basic $this->proxy_auth");
         }
         $cxContext = stream_context_create($aContext);
-        $this->response = file_get_contents($uri, false, $cxContext);
+        $this->response_body = file_get_contents($uri, false, $cxContext);
+        $this->response_headers = $http_response_header;
         $this->resetRequest();
         return $this;
     }
@@ -136,7 +143,7 @@ class HTTPClient
      */
     public function rawResponse()
     {
-        return $this->response;
+        return $this->response_body;
     }
 
     /**
@@ -145,7 +152,7 @@ class HTTPClient
      */
     public function jsonObjectResponse()
     {
-        return json_decode($this->response);
+        return json_decode($this->response_body);
     }
 
     /**
@@ -154,7 +161,7 @@ class HTTPClient
      */
     public function jsonArrayResponse()
     {
-        return json_decode($this->response, true);
+        return json_decode($this->response_body, true);
     }
 
     /**
@@ -163,7 +170,7 @@ class HTTPClient
      */
     public function xmlObjectResponse()
     {
-        return simplexml_load_string($this->response);
+        return simplexml_load_string($this->response_body);
     }
 
     /**
@@ -173,6 +180,36 @@ class HTTPClient
     public function xmlArrayResponse()
     {
         return json_decode(json_encode($this->xmlObjectResponse()), true);
+    }
+
+    /**
+     * Returns response headers with auto-set lowercase key values.
+     * @return object
+     */
+    public function responseHeaders()
+    {
+        $headers = array();
+        foreach ($this->response_headers as $header) {
+            $header_split = explode(':', $header);
+            if ($header_split[0] == $header) { // The first element is the HTTP header type, such as HTTP/1.1 200 OK,
+                $header_top = explode(' ', $header);
+                $headers['protocol'] = $header_top[0];
+                $headers['status_code'] = $header_top[1];
+                $headers['status_text'] = $header_top[2];
+            } else {
+                $headers[strtolower($header_split[0])] = trim($header_split[1]); // Other header elements will be assigned to their type so they can be accessed using their 'key'.
+            }
+        }
+        return json_decode(json_encode($headers));
+    }
+
+    /**
+     * Mainly used for debugging, this will return the RAW response headers.
+     * @return string Raw response headers as a string.
+     */
+    public function responseHeadersRaw()
+    {
+        return implode("\r\n", $this->response_headers);
     }
 
 }
