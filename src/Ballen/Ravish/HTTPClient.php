@@ -184,7 +184,7 @@ class HTTPClient
 
     /**
      * Returns response headers with auto-set lowercase key values.
-     * @return object
+     * @return object Reponse header elements.
      */
     public function responseHeaders()
     {
@@ -204,8 +204,8 @@ class HTTPClient
     }
 
     /**
-     * Mainly used for debugging, this will return the RAW response headers.
-     * @return string Raw response headers as a string.
+     * Return the raw response headers body as a plain text string (useful for debugging).
+     * @return string Raw response headers as a plain string.
      */
     public function responseHeadersRaw()
     {
