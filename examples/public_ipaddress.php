@@ -19,10 +19,12 @@ use Ballen\Ravish\HTTPClient;
 $bindhub_service = new HTTPClient();
 
 $bindhub_endpoint = 'https://www.bindhub.com/api/ip.xml';
-$bindhub_service->sendRequest($bindhub_endpoint);
-
-echo "Your public IP address is: " . $bindhub_service->xmlObjectResponse()->address->public;
+if ($bindhub_service->sendRequest($bindhub_endpoint)) {
+    echo "Your public IP address is: " . $bindhub_service->xmlObjectResponse()->address->public;
+    echo "<br /><br />The response headers was as follows: <strong>" . $bindhub_service->responseHeaders()->status_code . "</strong>";
+} else {
+    echo "<strong>Unable to get response from site!</strong><p>Are you sure you have the correct web service address, are connected to the internet or if you are using a proxy server in your network are you correctly authetnicated?</p>";
+}
 
 //var_dump($bindhub_service->xmlObjectResponse());
-
 ?>

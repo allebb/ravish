@@ -92,10 +92,13 @@ class HTTPClient
             array_push($aContext['http']['header'], "Proxy-Authorization: Basic $this->proxy_auth");
         }
         $cxContext = stream_context_create($aContext);
-        $this->response_body = file_get_contents($uri, false, $cxContext);
-        $this->response_headers = $http_response_header;
-        $this->resetRequest();
-        return $this;
+        $this->response_body = @file_get_contents($uri, false, $cxContext);
+        if ($this->response_body === false) {
+            return false;
+        } else {
+            $this->response_headers = $http_response_header;
+            return $this;
+        }
     }
 
     /**
@@ -213,5 +216,4 @@ class HTTPClient
     }
 
 }
-
 ?>
