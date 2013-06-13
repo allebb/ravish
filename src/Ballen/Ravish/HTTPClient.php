@@ -70,7 +70,7 @@ class HTTPClient
      * Object storage for the web service response headers.
      * @var array Response headers recieved.
      */
-    private $response_headers = null;
+    private $response_headers = array();
 
     /**
      * Sends the request to server and returns the raw response.
@@ -88,6 +88,13 @@ class HTTPClient
         // If a proxy server has been specified we'll set the proxy header autoamtically.
         if ($this->proxy_host) {
             $aContext['http'] = array_merge($aContext['http'], array('proxy' => $this->proxy_host . ':' . $this->proxy_port));
+        }
+        // If proxy authentication has been provided, we'll set the header for this now!
+        if ($this->proxy_auth) {
+            if (!isset($aContext['http']['header'])) {
+                $aContext['http']['header'] = array();
+            }
+            array_push($aContext['http']['header'], "Proxy-Authorization: Basic $this->proxy_auth");
         }
         // If a raw request body has been set, we'll send the content with the request.
         if ($this->request_body != null) {
@@ -107,22 +114,15 @@ class HTTPClient
             array_push($aContext['http']['header'], 'Content-Length: ' . strlen($request_content));
             $aContext['http']['content'] = $request_content;
         }
-        // If proxy authentication has been provided, we'll set the header for this now!
-        if ($this->proxy_auth) {
-            if (!isset($aContext['http']['header'])) {
-                $aContext['http']['header'] = array();
-            }
-            array_push($aContext['http']['header'], "Proxy-Authorization: Basic $this->proxy_auth");
-        }
         if (count($this->request_headers) > 0) {
             foreach ($this->request_headers as $custom_header => $custom_value) {
                 array_push($aContext['http']['header'], $custom_header . ": " . $custom_value);
             }
         }
-        #die(var_dump($aContext));
         $cxContext = stream_context_create($aContext);
-        $this->response_body = file_get_contents($uri, false, $cxContext);
+        $this->response_body = @file_get_contents($uri, false, $cxContext);
         if ($this->response_body === false) {
+            $this->response_headers = $http_response_header;
             return false;
         } else {
             $this->response_headers = $http_response_header;

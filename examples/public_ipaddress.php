@@ -19,7 +19,8 @@ use Ballen\Ravish\HTTPClient;
 $bindhub_service = new HTTPClient();
 
 $bindhub_endpoint = 'https://www.bindhub.com/api/ip.xml';
-if ($bindhub_service->sendRequest($bindhub_endpoint)) {
+
+if ($bindhub_service->get()->sendRequest($bindhub_endpoint)) {
     echo "Your public IP address is: " . $bindhub_service->xmlObjectResponse()->address->public;
     echo "<br /><br />The response headers was as follows: <strong>" . $bindhub_service->responseHeaders()->status_code . "</strong>";
 } else {
