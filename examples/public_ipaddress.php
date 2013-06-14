@@ -20,7 +20,7 @@ $bindhub_service = new HTTPClient();
 
 $bindhub_endpoint = 'https://www.bindhub.com/api/ip.xml';
 
-if ($bindhub_service->get()->sendRequest($bindhub_endpoint)) {
+if ($bindhub_service->get($bindhub_endpoint)) {
     echo "Your public IP address is: " . $bindhub_service->xmlObjectResponse()->address->public;
     echo "<br /><br />The response headers was as follows:<br/> <strong>" . $bindhub_service->responseHeaders()->status_code . "</strong>";
 } else {

@@ -83,7 +83,7 @@ class HTTPClient
      * @param string $uri The full URI to request and get the raw response from.
      * @return \Ballen\Ravish\HTTPClient
      */
-    public function sendRequest($uri)
+    protected function sendRequest($uri)
     {
         $aContext = array(
             'http' => array(
@@ -120,7 +120,7 @@ class HTTPClient
             }
         }
         $cxContext = stream_context_create($aContext);
-        var_dump($aContext);
+        //var_dump($aContext);
         $this->response_body = file_get_contents($uri, false, $cxContext);
         if ($this->response_body === false) {
             $this->response_headers = $http_response_header;
@@ -207,61 +207,60 @@ class HTTPClient
      * Sets the request type to be 'POST'.
      * @return \Ballen\Ravish\HTTPClient
      */
-    public function post()
+    public function post($uri)
     {
         $this->request_httpmethod = 'POST';
-        return $this;
+        return $this->sendRequest($uri);
     }
 
     /**
      * Sets the request type to be 'GET'.
      * @return \Ballen\Ravish\HTTPClient
      */
-    public function get()
+    public function get($uri)
     {
         $this->request_httpmethod = 'GET';
-        return $this;
+        return $this->sendRequest($uri);
     }
 
     /**
      * Sets the request type to be 'PUT'.
      * @return \Ballen\Ravish\HTTPClient
      */
-    public function put()
+    public function put($uri)
     {
         $this->request_httpmethod = 'PUT';
-        return $this;
+        return $this->sendRequest($uri);
     }
 
     /**
      * Sets the request type to be 'PATCH'.
      * @return \Ballen\Ravish\HTTPClient
      */
-    public function patch()
+    public function patch($uri)
     {
         $this->request_httpmethod = 'PATCH';
-        return $this;
+        return $this->sendRequest($uri);
     }
 
     /**
      * Sets the request type to be 'DELETE'.
      * @return \Ballen\Ravish\HTTPClient
      */
-    public function delete()
+    public function delete($uri)
     {
         $this->request_httpmethod = 'DELETE';
-        return $this;
+        return $this->sendRequest($uri);
     }
 
     /**
      * Resets the request parameters/settings ready for the next request.
      * @return \Ballen\Ravish\HTTPClient
      */
-    protected function resetRequest()
+    public function resetRequest()
     {
-        $this->request_params = array();
-        $this->request_wsmethod = null;
-        $this->request_httpmethod = 'GET';
+        $this->response_body = null;
+        $this->response_header = array();
         return $this;
     }
 
@@ -341,4 +340,5 @@ class HTTPClient
     }
 
 }
+
 ?>

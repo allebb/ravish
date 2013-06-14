@@ -36,8 +36,7 @@ if ($bindhub_service->sendRequest($bindhub_publicip_endpoint)) {
             ->addParameter('key', $bindhub_apikey)
             ->addParameter('record', $bindhub_record)
             ->addParameter('target', trim($ipa));
-    $bindhub_updater->post();
-    $bindhub_updater->sendRequest($bindhub_updateip_endpoint);
+    $bindhub_updater->post($bindhub_updateip_endpoint);
     if ($bindhub_updater->responseHeaders()->status_code == 200) {
         echo "New IP address has been updated successfully!";
     } else {

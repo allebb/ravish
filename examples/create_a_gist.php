@@ -17,6 +17,7 @@ require_once '../src/Ballen/Ravish/HTTPClient.php';
 use Ballen\Ravish\HTTPClient;
 
 $github_api = new HTTPClient();
+$github_api->resetRequest();
 
 $github_api_endpoint = 'https://api.github.com/gists';
 
@@ -29,11 +30,9 @@ $request_body = array(
         )
     )
 );
-$github_api->post()
-        ->addRequestHeader('Content-type', 'application/json')
-        ->setRequestBody(json_encode($request_body));
-$github_api->sendRequest($github_api_endpoint);
+$github_api->addRequestHeader('Content-type', 'application/json')
+        ->setRequestBody(json_encode($request_body))->post($github_api_endpoint);
 var_dump($github_api);
 
-echo $github_api->responseHeadersRaw();
+echo $github_api->rawResponse();
 ?>
