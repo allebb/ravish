@@ -17,7 +17,6 @@ require_once '../src/Ballen/Ravish/HTTPClient.php';
 use Ballen\Ravish\HTTPClient;
 
 $github_api = new HTTPClient();
-$github_api->resetRequest();
 
 $github_api_endpoint = 'https://api.github.com/gists';
 
@@ -26,13 +25,15 @@ $request_body = array(
     'public' => true,
     'files' => array(
         'file1.txt' => array(
-            'content' => 'This is a very quick test using the Ravish HTTPClient from'
+            'content' => 'This is a very quick test using the Ravish HTTPClient from http://www.github.com/bobsta63/ravish'
         )
     )
 );
-$github_api->addRequestHeader('Content-type', 'application/json')
-        ->setRequestBody(json_encode($request_body))->post($github_api_endpoint);
-var_dump($github_api);
+$github_api->serverRedirects(false) // GitHub will attempt to redirect you after the request was successful, we need to therefore stop the redirect!
+        ->addRequestHeader('Content-Type', 'application/json')
+        ->setRequestBody(json_encode($request_body))
+        ->post($github_api_endpoint);
 
-echo $github_api->rawResponse();
+var_dump($github_api->jsonObjectResponse());
+
 ?>

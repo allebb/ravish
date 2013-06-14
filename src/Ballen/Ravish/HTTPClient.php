@@ -55,6 +55,24 @@ class HTTPClient
     private $request_body = null;
 
     /**
+     * Allow web requests to redirect automatically. (default is 'false')
+     * @var boolean
+     */
+    private $request_followredirects = false;
+
+    /**
+     * Display HTTP error messages in PHP if the file_get_contents() request fails. (defualt is 'false')
+     * @var boolean
+     */
+    private $request_ignoreerrors = false;
+
+    /**
+     * The request timeout in seconds.
+     * @var int Request timeout in seconds.
+     */
+    private $request_timeout = 10;
+
+    /**
      * Useragent string to send with each request.
      * @var string The useragent string sent with requests.
      */
@@ -79,16 +97,29 @@ class HTTPClient
     private $response_headers = array();
 
     /**
+     * Class constructor
+     */
+    public function __construct()
+    {
+        // Nothing special here but good practice to add it anyway!
+    }
+
+    /**
      * Sends the request to server and returns the raw response.
      * @param string $uri The full URI to request and get the raw response from.
      * @return \Ballen\Ravish\HTTPClient
      */
     protected function sendRequest($uri)
     {
+        $this->resetResponse();
         $aContext = array(
             'http' => array(
                 'method' => $this->request_httpmethod,
+                'user_agent' => $this->user_agent,
                 'request_fulluri' => true,
+                'follow_location' => $this->request_followredirects,
+                'ignore_errors' => $this->request_ignoreerrors,
+                'timeout' => $this->request_timeout,
             ),
         );
         $aContext['http']['header'] = array();
@@ -120,7 +151,7 @@ class HTTPClient
             }
         }
         $cxContext = stream_context_create($aContext);
-        //var_dump($aContext);
+        //var_dump($aContext); // Can be used for debugging your current headers etc.
         $this->response_body = file_get_contents($uri, false, $cxContext);
         if ($this->response_body === false) {
             $this->response_headers = $http_response_header;
@@ -132,6 +163,28 @@ class HTTPClient
     }
 
     /**
+     * Enable or Disable server side redirects when sending requests.
+     * @param boolean $setting Allow server-side redirects
+     * @return \Ballen\Ravish\HTTPClient
+     */
+    public function serverRedirects($setting)
+    {
+        $this->request_followredirects = (bool) $setting;
+        return $this;
+    }
+
+    /**
+     * Display error messages caused by file_get_contents (the web request function), default is 'false'.
+     * @param boolean $setting Display errors or not.
+     * @return \Ballen\Ravish\HTTPClient
+     */
+    public function showErrors($setting)
+    {
+        $this->request_ignoreerrors = (bool) $setting;
+        return $this;
+    }
+
+    /**
      * Sets Proxy server host and port infomation (if required.)
      * @param string $host The hostname or IP address of the proxy server.
      * @param string $port The TCP port to use to connect to the proxy (default is set to 8080)
@@ -139,9 +192,9 @@ class HTTPClient
      */
     public function setProxyHost($host, $port = null)
     {
-        $this->proxy_host = $host;
+        $this->proxy_host = (string) $host;
         if ($port) {
-            $this->proxy_port = $port;
+            $this->proxy_port = (int) $port;
         }
         return $this;
     }
@@ -154,7 +207,7 @@ class HTTPClient
      */
     public function setProxyAuth($username, $password)
     {
-        $this->proxy_auth = base64_encode("$username:$password");
+        $this->proxy_auth = (string) base64_encode("$username:$password");
         return $this;
     }
 
@@ -164,7 +217,7 @@ class HTTPClient
      */
     public function setCustomUserAgent($useragent)
     {
-        $this->user_agent = $useragent;
+        $this->user_agent = (string) $useragent;
         return $this;
     }
 
@@ -259,8 +312,21 @@ class HTTPClient
      */
     public function resetRequest()
     {
+        $this->request_headers = array();
+        $this->request_httpmethod = 'GET';
+        $this->request_params = array();
+        $this->request_body = null;
+        return $this;
+    }
+
+    /**
+     * Resets the response header and body content ready.
+     * @return \Ballen\Ravish\HTTPClient
+     */
+    public function resetResponse()
+    {
+        $this->response_headers = array();
         $this->response_body = null;
-        $this->response_header = array();
         return $this;
     }
 
