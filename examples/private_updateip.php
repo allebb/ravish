@@ -28,7 +28,7 @@ $bindhub_record = 'blahtest.autono.de';
 $bindhub_publicip_endpoint = 'https://www.bindhub.com/api/ip.xml';
 $bindhub_updateip_endpoint = 'https://www.bindhub.com/api/record/update.json'; // As a second example, we'll return the response and handle is using JSON.
 
-if ($bindhub_service->sendRequest($bindhub_publicip_endpoint)) {
+if ($bindhub_service->get($bindhub_publicip_endpoint)) {
     echo "Your current public IP address is: " . $bindhub_service->xmlObjectResponse()->address->public . " we'll now update your IP address in DNS for your domain name <strong>" . $bindhub_record . "</strong>.";
     // We now make a new request and send the new IP address...
     $ipa = $bindhub_service->xmlObjectResponse()->address->public;
