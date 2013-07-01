@@ -182,50 +182,73 @@ class HTTPClient
      */
     private function requestViaCurl($uri)
     {
-        if (!function_exists(curl_init())) {
+        if (!function_exists('curl_init')) {
             die('ERROR: The cURL extenion does not appear to be installed with this version of PHP, first install cURL before continuing or you could try removing the useCurl() method to use PHP\'s native file_get_content() function instead.');
         } else {
-            $ch = curl_init();
+            $ch = curl_init($uri);
             $curl_options = array(
-                'CURLOPT_TIMEOUT' => $this->request_timeout,
-                'CURLOPT_FOLLOWLOCATION' => $this->request_followredirects,
-                'CURLOPT_RETURNTRANSFER' => true,
-                'CURLOPT_USERAGENT' => $this->user_agent,
-                'CURLOPT_HTTPHEADER' => $this->request_headers,
-                'CURLOPT_URL' => $uri,
-                'CURLOPT_HEADER' => true,
-                'CURLOPT_CUSTOMREQUEST' => $this->request_httpmethod,
+                CURLOPT_TIMEOUT => $this->request_timeout,
+                CURLOPT_FOLLOWLOCATION => $this->request_followredirects,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_USERAGENT => $this->user_agent,
+                CURLOPT_HTTPHEADER => $this->request_headers,
+                CURLOPT_HEADER => true,
+                CURLOPT_CUSTOMREQUEST => $this->request_httpmethod,
+                //CURLOPT_DNS_USE_GLOBAL_CACHE => false,
+                //CURLOPT_DNS_CACHE_TIMEOUT => 2,
+                //CURLOPT_SSL_VERIFYPEER => false,
+                //CURLOPT_SSL_VERIFYHOST => 2,
+                //CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
             );
-
             // If a proxy server has been specified we'll set the cURL option to use that proxy server.
             if ($this->proxy_host) {
-                array_push($curl_options, array(
-                    'CURLOPT_HTTPPROXYTUNNEL' => true,
-                    'CURLOPT_PROXY' => $this->proxy_host . ':' . $this->proxy_port,
-                    'CURLOPT_PROXYTYPE' => 'CURLPROXY_HTTP',
+                $curl_options = array_merge($curl_options, array(
+                    CURLOPT_PROXY => $this->proxy_host,
+                    CURLOPT_PROXYPORT => $this->proxy_port,
                 ));
             }
-
             // If proxy authetnications has been specified we'll set the proxy authentication headers now!
             if ($this->proxy_auth) {
-                array_push($curl_options, array(
-                    'CURLOPT_PROXYUSERPWD' => $this->proxy_auth,
+                $curl_options = array_merge($curl_options, array(
+                    CURLOPT_PROXYUSERPWD => $this->proxy_auth,
                 ));
             }
             // If an array of parameters have been set we'll set the request parameters and cURL will not automatically add the multipart/form-data header type.
             if (count($this->request_params) > 0) {
-                array_push($curl_options, array(
-                    'CURLOPT_POSTFIELDS' => $this->request_params,
+                $curl_options = array_merge($curl_options, array(
+                    CURLOPT_POSTFIELDS => $this->request_params,
                 ));
             }
             // If the basic authentication option has been set then we'll set the Basic Auth headers now too.
             if ($this->request_basicauth) {
-                array_push($curl_options, array(
-                    ' CURLOPT_USERPWD' => $this->request_basicauth,
+                $curl_options = array_merge($curl_options, array(
+                    CURLOPT_USERPWD => $this->request_basicauth,
                 ));
             }
+            // We go through and add all the other custom HTTP headers and then the useragent.
+            if (count($this->request_headers) > 0) {
+                $curl_options = array_merge($curl_options, array(
+                    CURLOPT_HTTPHEADER => $this->request_headers,
+                ));
+            }
+            // If a raw request body has been specified we'll add this to the request too!
+            if ($this->request_body != null) {
+                $curl_options = array_merge($curl_options, array(
+                    CURLOPT_POSTFIELDS => $this->request_body,
+                ));
+            }
+            // Now we make the request using cURL.
             curl_setopt_array($ch, $curl_options);
+            // cURL Debugging Stuff!
+            var_dump(curl_exec($ch));
+            var_dump(curl_getinfo($ch));
+            var_dump(curl_error($ch));
+            die();
             $response = curl_exec($ch);
+            if (!$response) {
+                die('ERROR: ' . curl_errno($ch) . ' - ' . curl_error($ch));
+            }
+            curl_close($ch);
             die(var_dump($response));
         }
     }
