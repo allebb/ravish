@@ -140,7 +140,7 @@ class HTTPClient
         }
         // If proxy authentication has been provided, we'll set the header for this now!
         if ($this->proxy_auth) {
-            array_push($aContext['http']['header'], "Proxy-Authorization: Basic $this->proxy_auth");
+            array_push($aContext['http']['header'], "Proxy-Authorization: Basic " . base64_encode($this->proxy_auth));
         }
         // If HTTP basic authentication encoded string exists lets add it's header..
         if ($this->request_basicauth != null) {
@@ -182,7 +182,32 @@ class HTTPClient
      */
     private function requestViaCurl($uri)
     {
+        if (!function_exists(curl_init())) {
+            die('ERROR: The cURL extenion does not appear to be installed with this version of PHP, first install cURL before continuing or you could try removing the useCurl() method to use PHP\'s native file_get_content() function instead.');
+        } else {
+            $ch = curl_init();
+            $curl_options = array(
+                'CURLOPT_TIMEOUT' => $this->request_timeout,
+                'CURLOPT_FOLLOWLOCATION' => $this->request_followredirects,
+                'CURLOPT_RETURNTRANSFER' => true,
+                'CURLOPT_USERAGENT' => $this->user_agent,
+            );
 
+            // If a proxy server has been specified we'll set the cURL option to use that proxy server.
+            if ($this->proxy_host) {
+                array_push($curl_options, array(
+                    'CURLOPT_PROXY' => $this->proxy_host . ':' . $this->proxy_port,
+                ));
+            }
+
+            // If proxy authetnications has been specified we'll set the proxy authentication headers now!
+            if ($this->proxy_auth) {
+                array_push($curl_options, array(
+                    'CURLOPT_PROXYUSERPWD' => $this->proxy_auth,
+                ));
+            }
+            curl_setopt_array($ch, $curl_options);
+        }
     }
 
     /**
@@ -245,7 +270,7 @@ class HTTPClient
      */
     public function setProxyAuth($username, $password)
     {
-        $this->proxy_auth = (string) base64_encode("$username:$password");
+        $this->proxy_auth = (string) $username . ':' . $password;
         return $this;
     }
 
