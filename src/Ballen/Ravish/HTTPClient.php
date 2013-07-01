@@ -191,12 +191,18 @@ class HTTPClient
                 'CURLOPT_FOLLOWLOCATION' => $this->request_followredirects,
                 'CURLOPT_RETURNTRANSFER' => true,
                 'CURLOPT_USERAGENT' => $this->user_agent,
+                'CURLOPT_HTTPHEADER' => $this->request_headers,
+                'CURLOPT_URL' => $uri,
+                'CURLOPT_HEADER' => true,
+                'CURLOPT_CUSTOMREQUEST' => $this->request_httpmethod,
             );
 
             // If a proxy server has been specified we'll set the cURL option to use that proxy server.
             if ($this->proxy_host) {
                 array_push($curl_options, array(
+                    'CURLOPT_HTTPPROXYTUNNEL' => true,
                     'CURLOPT_PROXY' => $this->proxy_host . ':' . $this->proxy_port,
+                    'CURLOPT_PROXYTYPE' => 'CURLPROXY_HTTP',
                 ));
             }
 
@@ -206,7 +212,21 @@ class HTTPClient
                     'CURLOPT_PROXYUSERPWD' => $this->proxy_auth,
                 ));
             }
+            // If an array of parameters have been set we'll set the request parameters and cURL will not automatically add the multipart/form-data header type.
+            if (count($this->request_params) > 0) {
+                array_push($curl_options, array(
+                    'CURLOPT_POSTFIELDS' => $this->request_params,
+                ));
+            }
+            // If the basic authentication option has been set then we'll set the Basic Auth headers now too.
+            if ($this->request_basicauth) {
+                array_push($curl_options, array(
+                    ' CURLOPT_USERPWD' => $this->request_basicauth,
+                ));
+            }
             curl_setopt_array($ch, $curl_options);
+            $response = curl_exec($ch);
+            die(var_dump($response));
         }
     }
 
