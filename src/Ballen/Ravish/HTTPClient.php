@@ -103,6 +103,12 @@ class HTTPClient
     private $response_headers = array();
 
     /**
+     * Use cURL to make the requests instead of file_get_contents() of which may work better in enviroments where the http_response_header function has been disabled or blocked by a framework etc.
+     * @var boolean
+     */
+    private $use_curl = false;
+
+    /**
      * Class constructor
      */
     public function __construct()
@@ -111,13 +117,11 @@ class HTTPClient
     }
 
     /**
-     * Sends the request to server and returns the raw response.
-     * @param string $uri The full URI to request and get the raw response from.
-     * @return \Ballen\Ravish\HTTPClient
+     * Sends the request to server and returns the raw response using PHP's file_get_contents() function.
+     * @param string $uri The URI to send the request to.
      */
-    protected function sendRequest($uri)
+    private function requestViaFileGetContents($uri)
     {
-        $this->resetResponse();
         $aContext = array(
             'http' => array(
                 'method' => $this->request_httpmethod,
@@ -169,6 +173,30 @@ class HTTPClient
         } else {
             $this->response_headers = $http_response_header;
             return $this;
+        }
+    }
+
+    /**
+     * Sends the request to server and returns the raw response using cURL (Server must have PHP compiled with cURL for this to work!).
+     * @param string $uri The URI to send the request to.
+     */
+    private function requestViaCurl($uri)
+    {
+
+    }
+
+    /**
+     * Sends the request to server and returns the raw response.
+     * @param string $uri The full URI to request and get the raw response from.
+     * @return \Ballen\Ravish\HTTPClient
+     */
+    protected function sendRequest($uri)
+    {
+        $this->resetResponse();
+        if ($this->use_curl) {
+            return $this->requestViaCurl($uri);
+        } else {
+            return $this->requestViaFileGetContents($uri);
         }
     }
 
