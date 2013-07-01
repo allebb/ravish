@@ -455,6 +455,16 @@ class HTTPClient
         return implode("\r\n", $this->response_headers);
     }
 
+    /**
+     * Tells the library to use cURL instead of PHP's file_get_contents() function to make the request with.
+     * @return \Ballen\Ravish\HTTPClient
+     */
+    public function useCurl()
+    {
+        $this->use_curl = true;
+        return $this;
+    }
+
 }
 
 ?>
