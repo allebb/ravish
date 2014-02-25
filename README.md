@@ -1,9 +1,11 @@
 Ravish
 ======
 
-Ravish is a composer/PSR-0 compatible basic HTTP Client for PHP.
+** Please note: I no longer maintain this library, I recommend that you you use [Guzzle](http://guzzlephp.org/) instead!**
 
-Ravish is written and maintained by Bobby Allen, licensed under the MIT license.
+Ravish is a basic HTTP Client library for PHP.
+
+Ravish is written and maintained by [Bobby Allen](http://bobbyallen.me), licensed under the MIT license.
 
 License
 -------
