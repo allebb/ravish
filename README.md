@@ -1,7 +1,7 @@
 Ravish
 ======
 
-** Please note: I no longer maintain this library, I recommend that you you use [Guzzle](http://guzzlephp.org/) instead!**
+**Please note: I no longer maintain this library, I recommend that you you use [Guzzle](http://guzzlephp.org/) instead!**
 
 Ravish is a basic HTTP Client library for PHP.
 
